@@ -1,11 +1,12 @@
-create database bdagencia
+CREATE DATABASE IF NOT EXISTS bdagencia;
+USE bdagencia;
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(20) NOT NULL
 );
 
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL,
     apellidos VARCHAR(120) NOT NULL,
@@ -17,16 +18,15 @@ CREATE TABLE usuarios (
     FOREIGN KEY (rol_id) REFERENCES roles(id)
 );
 
-CREATE TABLE destinos (
+CREATE TABLE IF NOT EXISTS destinos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     descripcion TEXT,
     actividades TEXT,
-    costo_base DECIMAL(10,2),
-    duracion_dias INT 
-)
+    costo_base DECIMAL(10,2)
+);
 
-CREATE TABLE paquetes_turisticos (
+CREATE TABLE IF NOT EXISTS paquetes_turisticos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     destino_id INT NOT NULL,
     fecha_inicio DATE NOT NULL,
@@ -36,12 +36,12 @@ CREATE TABLE paquetes_turisticos (
     FOREIGN KEY (destino_id) REFERENCES destinos(id)
 );
 
-CREATE TABLE estado (
-	id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS estado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL
 );
 
-CREATE TABLE reservas (
+CREATE TABLE IF NOT EXISTS reservas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     paquete_id INT NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE reservas (
     FOREIGN KEY (paquete_id) REFERENCES paquetes_turisticos(id)
 );
 
-
-
-
-
+-- Usuario de administración para trabajar desde MySQL Workbench con todos los privilegios sobre la base.
+CREATE USER IF NOT EXISTS 'viajes_admin'@'%' IDENTIFIED BY '123*';
+GRANT ALL PRIVILEGES ON bdagencia.* TO 'viajes_admin'@'%';
+FLUSH PRIVILEGES;
