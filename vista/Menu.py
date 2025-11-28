@@ -281,6 +281,9 @@ class Menu:
     def __crear_paquete(self):
         try:
             self.__listar_destinos()
+            if not self.__destino_controller.listar():
+                input("Presione Enter para continuar...")
+                return
             destino_id = input("ID del destino para el paquete: ").strip()
             fecha_inicio = self.__leer_fecha("Fecha inicio (DD-MM-AAAA): ")
             fecha_fin = self.__leer_fecha("Fecha fin (DD-MM-AAAA): ")
