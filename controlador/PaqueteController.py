@@ -50,6 +50,13 @@ class PaqueteController:
     def obtener(self, paquete_id):
         return self.__paquete_service.obtener_paquete(paquete_id)
 
+    # Elimina un paquete por id.
+    def eliminar(self, paquete_id):
+        if not str(paquete_id).isdigit():
+            raise ValueError("El ID de paquete debe ser un número válido.")
+        paquete_id = int(paquete_id)
+        return self.__paquete_service.eliminar_paquete(paquete_id)
+
     # Confirma que las fechas tengan un formato valido y un rango correcto.
     def __validar_fechas(self, fecha_inicio, fecha_fin):
         try:

@@ -153,7 +153,8 @@ class Menu:
             print("1. Crear paquete")
             print("2. Listar paquetes")
             print("3. Cambiar disponibilidad")
-            print("4. Volver")
+            print("4. Eliminar paquete")
+            print("5. Volver")
             opcion = input("Seleccione una opción: ").strip()
             if opcion == "1":
                 self.__crear_paquete()
@@ -162,6 +163,8 @@ class Menu:
             elif opcion == "3":
                 self.__cambiar_disponibilidad_paquete()
             elif opcion == "4":
+                self.__eliminar_paquete()
+            elif opcion == "5":
                 break
             else:
                 print("Opción inválida.")
@@ -486,4 +489,36 @@ class Menu:
                 print(f"No se pudo eliminar la cuenta: {error}")
         else:
             print("Eliminación de cuenta cancelada.")
+        input("Presione Enter para continuar...")
+
+    def __eliminar_paquete(self):
+        try:
+            paquetes = self.__paquete_controller.listar()
+            if not paquetes:
+                print("No hay paquetes disponibles para eliminar.")
+                input("Presione Enter para continuar...")
+                return
+            print("=== Paquetes Turísticos ===")
+            for paquete in paquetes:
+                print(
+                    f"[{paquete[0]}] Destino: {paquete[1]} | {paquete[2]} al {paquete[3]} "
+                    f"| Precio: {paquete[4]} | Disponible: {'Sí' if paquete[5] else 'No'}"
+                )
+            paquete_id = input("ID del paquete a eliminar: ").strip()
+            if paquete_id == "" or not paquete_id.isdigit():
+                print("El ID debe ser un número válido.")
+                input("Presione Enter para continuar...")
+                return
+            consentimiento = input("¿Está seguro? Esta acción no se puede deshacer (s/n): ").strip().lower()
+            if consentimiento != "s":
+                print("Eliminación cancelada.")
+                input("Presione Enter para continuar...")
+                return
+            eliminado = self.__paquete_controller.eliminar(paquete_id)
+            if eliminado:
+                print("Paquete eliminado.")
+            else:
+                print("No se encontró el paquete indicado.")
+        except Exception as error:
+            print(f"Error al eliminar paquete: {error}")
         input("Presione Enter para continuar...")
