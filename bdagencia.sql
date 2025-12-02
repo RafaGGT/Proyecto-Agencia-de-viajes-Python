@@ -1,11 +1,13 @@
 CREATE DATABASE IF NOT EXISTS bdagencia;
 USE bdagencia;
 
+-- ROLES
 CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(20) NOT NULL
 );
 
+-- USUARIOS
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL,
@@ -15,9 +17,13 @@ CREATE TABLE IF NOT EXISTS usuarios (
     clave VARCHAR(255) NOT NULL,
     telefono VARCHAR(30),
     rol_id INT,
-    FOREIGN KEY (rol_id) REFERENCES roles(id)
+    FOREIGN KEY (rol_id)
+        REFERENCES roles(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
+-- DESTINOS
 CREATE TABLE IF NOT EXISTS destinos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
@@ -26,6 +32,7 @@ CREATE TABLE IF NOT EXISTS destinos (
     costo_base DECIMAL(10,2)
 );
 
+-- PAQUETES TURÍSTICOS
 CREATE TABLE IF NOT EXISTS paquetes_turisticos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     destino_id INT NOT NULL,
@@ -33,26 +40,44 @@ CREATE TABLE IF NOT EXISTS paquetes_turisticos (
     fecha_fin DATE NOT NULL,
     precio_total DECIMAL(10,2) NOT NULL,
     disponible BOOLEAN NOT NULL DEFAULT TRUE,
-    FOREIGN KEY (destino_id) REFERENCES destinos(id)
+
+    FOREIGN KEY (destino_id)
+        REFERENCES destinos(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
+-- ESTADO
 CREATE TABLE IF NOT EXISTS estado (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL
 );
 
+-- RESERVAS
 CREATE TABLE IF NOT EXISTS reservas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     paquete_id INT NOT NULL,
     estado_id INT NOT NULL,
     fecha_reserva DATETIME NOT NULL,
-    FOREIGN KEY (estado_id) REFERENCES estado(id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    FOREIGN KEY (paquete_id) REFERENCES paquetes_turisticos(id)
+
+    FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (paquete_id)
+        REFERENCES paquetes_turisticos(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (estado_id)
+        REFERENCES estado(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
--- Usuario de administración para trabajar desde MySQL Workbench con todos los privilegios sobre la base.
+-- USUARIO ADMINISTRADOR
 CREATE USER IF NOT EXISTS 'viajes_admin'@'%' IDENTIFIED BY '123*';
 GRANT ALL PRIVILEGES ON bdagencia.* TO 'viajes_admin'@'%';
 FLUSH PRIVILEGES;

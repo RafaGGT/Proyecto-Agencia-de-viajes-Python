@@ -75,23 +75,17 @@ class DestinoService:
             cursor.close()
 
     # Actualiza los campos de un destino existente.
-    def actualizar_destino(self, destino_id, destino_actualizado):
+    def actualizar_destino(self, destino_id, cambio, tipo):
         cursor = self.__conexion.cursor()
         try:
-            consulta = """
+            consulta = f"""
                 UPDATE destinos
-                SET nombre=%s, descripcion=%s, actividades=%s, costo_base=%s
+                SET {tipo}=%s
                 WHERE id=%s;
             """
             cursor.execute(
                 consulta,
-                (
-                    destino_actualizado.nombre,
-                    destino_actualizado.descripcion,
-                    destino_actualizado.actividades,
-                    destino_actualizado.costo_base,
-                    destino_id,
-                ),
+                (cambio, destino_id)
             )
             self.__conexion.commit()
             return cursor.rowcount > 0

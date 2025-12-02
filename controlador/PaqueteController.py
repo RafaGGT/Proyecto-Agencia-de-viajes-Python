@@ -13,9 +13,13 @@ class PaqueteController:
     # Crea un paquete turistico para un destino dado.
     def crear(self, destino_id, fecha_inicio, fecha_fin, precio_total=None, disponible=True):
         self.__validar_fechas(fecha_inicio, fecha_fin)
+        if not str(destino_id).isdigit():
+            raise ValueError("El ID de destino debe ser un número válido.")
+        destino_id = int(destino_id)
         destino = self.__destino_service.obtener_destino(destino_id)
         if not destino:
             raise ValueError("El destino indicado no existe.")
+        
 
         paquete = PaqueteTuristico(
             destino_id=destino_id,
@@ -37,11 +41,21 @@ class PaqueteController:
 
     # Actualiza la disponibilidad de un paquete.
     def actualizar_disponibilidad(self, paquete_id, disponible):
+        if not str(paquete_id).isdigit():
+            raise ValueError("El ID de paquete debe ser un número válido.")
+        paquete_id = int(paquete_id)
         return self.__paquete_service.actualizar_disponibilidad(paquete_id, disponible)
 
     # Obtiene un paquete por identificador.
     def obtener(self, paquete_id):
         return self.__paquete_service.obtener_paquete(paquete_id)
+
+    # Elimina un paquete por id.
+    def eliminar(self, paquete_id):
+        if not str(paquete_id).isdigit():
+            raise ValueError("El ID de paquete debe ser un número válido.")
+        paquete_id = int(paquete_id)
+        return self.__paquete_service.eliminar_paquete(paquete_id)
 
     # Confirma que las fechas tengan un formato valido y un rango correcto.
     def __validar_fechas(self, fecha_inicio, fecha_fin):

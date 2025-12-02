@@ -32,6 +32,7 @@ class Menu:
                 self.registrar_usuario()
             elif opcion == "3":
                 print("Saliendo del programa...")
+                self.__usuario_controller.cerrar_conexion()
                 break
             else:
                 print("Opción inválida. Por favor, intente de nuevo.")
@@ -97,11 +98,16 @@ class Menu:
     # Presenta las opciones para clientes.
     def __menu_cliente(self):
         while True:
+            if self.__usuario_actual is None:
+                print("Debe iniciar sesión primero.")
+                input("Presione Enter para continuar...")
+                return
             print("\n=== Panel Cliente ===")
-            print("1. Ver paquetes disponibles por fecha")
+            print("1. Ver paquetes")
             print("2. Reservar paquete")
             print("3. Ver mis reservas")
-            print("4. Cerrar Sesión")
+            print("4. Ajustes de cuenta")
+            print("0. Cerrar Sesión")
             opcion = input("Seleccione una opción: ").strip()
             if opcion == "1":
                 self.__mostrar_paquetes_disponibles()
@@ -110,6 +116,8 @@ class Menu:
             elif opcion == "3":
                 self.__mostrar_reservas_cliente()
             elif opcion == "4":
+                self.__menu_ajustes_cuenta()
+            elif opcion == "0":
                 self.__usuario_actual = None
                 break
             else:
@@ -145,7 +153,8 @@ class Menu:
             print("1. Crear paquete")
             print("2. Listar paquetes")
             print("3. Cambiar disponibilidad")
-            print("4. Volver")
+            print("4. Eliminar paquete")
+            print("5. Volver")
             opcion = input("Seleccione una opción: ").strip()
             if opcion == "1":
                 self.__crear_paquete()
@@ -154,6 +163,8 @@ class Menu:
             elif opcion == "3":
                 self.__cambiar_disponibilidad_paquete()
             elif opcion == "4":
+                self.__eliminar_paquete()
+            elif opcion == "5":
                 break
             else:
                 print("Opción inválida.")
@@ -175,37 +186,92 @@ class Menu:
         destinos = self.__destino_controller.listar()
         if not destinos:
             print("No hay destinos registrados.")
-            return
+            return []
         for destino in destinos:
             print(
                 f"[{destino.id}] {destino.nombre} - {destino.descripcion} | Actividades: {destino.actividades} "
                 f"| Costo base: {destino.costo_base}"
             )
+        return destinos
 
     # Solicita datos y actualiza un destino.
     def __editar_destino(self):
         try:
-            self.__listar_destinos()
-            destino_id = int(input("ID del destino a editar: ").strip())
-            nombre = input("Nuevo nombre: ").strip()
-            descripcion = input("Nueva descripción: ").strip()
-            actividades = input("Nuevas actividades: ").strip()
-            costo_base = float(input("Nuevo costo base: ").strip())
+            destinos = self.__listar_destinos()
+            if not destinos:
+                input("Presione Enter para continuar...")
+                return
+            destino_id = input("ID del destino a editar: ").strip()
+            if destino_id == "":
+                print("El ID no puede estar vacio")
+                return
+            if not destino_id.isdigit():
+                print("El ID debe ser un número válido.")
+                return
+            destino_id = int(destino_id)
+
+            destino_obj = self.__destino_controller.obtener(destino_id)
+            if not destino_obj:
+                print("No se encontró el destino indicado.")
+                return
+
+            print("=== Edición de destino ===")
+            print("1) Nombre \n2) Descripción \n3) Actividades \n4) Costo base \n5) Cancelar edición")
+            select = input("Seleccione el campo a editar (1-5): ").strip()
+            if select == "5":
+                print("Edición cancelada.")
+                input("Presione Enter para continuar...")
+                return
+            elif select == "1":
+                cambio = input("Nuevo nombre: ").strip()
+                tipo = "nombre"
+            elif select == "2":
+                cambio = input("Nueva descripción: ").strip()
+                tipo = "descripcion"
+            elif select == "3":
+                cambio = input("Nuevas actividades: ").strip()
+                tipo = "actividades"
+            elif select == "4":
+                cambio = input("Nuevo costo base: ").strip()
+                try:
+                    cambio = float(cambio)
+                except ValueError:
+                    print("El costo base debe ser un número válido.")
+                    return
+                tipo = "costo_base"
+            else:
+                print("Opción inválida. Edición cancelada.")
+                input("Presione Enter para continuar...")
+                return
+
             actualizado = self.__destino_controller.actualizar(
-                destino_id, nombre, descripcion, actividades, costo_base
+                destino_id, cambio, tipo
             )
             if actualizado:
                 print("Destino actualizado.")
             else:
                 print("No se pudo actualizar, verifique el ID.")
+        except ValueError as ve:
+            print(f"Datos ingresados inválidos: {ve}")        
         except Exception as error:
             print(f"Error al actualizar destino: {error}")
 
     # Elimina un destino seleccionado.
     def __eliminar_destino(self):
         try:
-            self.__listar_destinos()
-            destino_id = int(input("ID del destino a eliminar: ").strip())
+            destinos = self.__listar_destinos()
+            if not destinos:
+                input("Presione Enter para continuar...")
+                return
+            destino_id = input("ID del destino a eliminar: ").strip()
+            if destino_id == "" or destino_id.isdigit() is False:
+                print("El ID debe ser un número válido.")
+                return
+            consentimiento = input("¿Está seguro? Esta acción no se puede deshacer s para confirmar, cualquier otra tecla para cancelar: ").strip().lower()
+            if consentimiento != "s":
+                print("Eliminación cancelada.")
+                input("Presione Enter para continuar...")
+                return
             eliminado = self.__destino_controller.eliminar(destino_id)
             if eliminado:
                 print("Destino eliminado.")
@@ -218,7 +284,10 @@ class Menu:
     def __crear_paquete(self):
         try:
             self.__listar_destinos()
-            destino_id = int(input("ID del destino para el paquete: ").strip())
+            if not self.__destino_controller.listar():
+                input("Presione Enter para continuar...")
+                return
+            destino_id = input("ID del destino para el paquete: ").strip()
             fecha_inicio = self.__leer_fecha("Fecha inicio (DD-MM-AAAA): ")
             fecha_fin = self.__leer_fecha("Fecha fin (DD-MM-AAAA): ")
             self.__paquete_controller.crear(destino_id, fecha_inicio, fecha_fin, None, True)
@@ -232,6 +301,7 @@ class Menu:
         if not paquetes:
             print("No hay paquetes registrados.")
             return
+        print("=== Paquetes Turísticos ===")
         for paquete in paquetes:
             print(
                 f"[{paquete[0]}] Destino: {paquete[1]} | {paquete[2]} al {paquete[3]} "
@@ -241,31 +311,37 @@ class Menu:
     # Cambia la disponibilidad de un paquete.
     def __cambiar_disponibilidad_paquete(self):
         try:
-            self.__listar_paquetes()
-            paquete_id = int(input("ID del paquete: ").strip())
+            paquetes = self.__listar_paquetes()
+            if not paquetes:
+                input("Presione Enter para continuar...")
+                return
+            paquete_id = input("ID del paquete: ").strip()
             nuevo_estado = input("¿Marcar como disponible? (s/n): ").strip().lower() == "s"
             actualizado = self.__paquete_controller.actualizar_disponibilidad(paquete_id, nuevo_estado)
             if actualizado:
                 print("Disponibilidad actualizada.")
+                input("Presione Enter para continuar...")
             else:
                 print("No se pudo actualizar, revise el ID.")
+                input("Presione Enter para continuar...")
         except Exception as error:
             print(f"Error al cambiar disponibilidad: {error}")
 
     # Muestra paquetes disponibles segun rango de fechas.
     def __mostrar_paquetes_disponibles(self):
         try:
-            fecha_inicio = self.__leer_fecha("Fecha inicio deseada (DD-MM-AAAA): ")
-            fecha_fin = self.__leer_fecha("Fecha fin deseada (DD-MM-AAAA): ")
-            paquetes = self.__paquete_controller.listar_disponibles(fecha_inicio, fecha_fin)
-            if not paquetes:
-                print("No hay paquetes disponibles para esas fechas.")
-                return
-            for paquete in paquetes:
-                print(
-                    f"[{paquete[0]}] Destino: {paquete[1]} | {paquete[2]} al {paquete[3]} "
-                    f"| Precio: {paquete[4]}"
-                )
+            # fecha_inicio = self.__leer_fecha("Fecha inicio deseada (DD-MM-AAAA): ")
+            # fecha_fin = self.__leer_fecha("Fecha fin deseada (DD-MM-AAAA): ")
+            # paquetes = self.__paquete_controller.listar_disponibles(fecha_inicio, fecha_fin)
+            paquetes = self.__listar_paquetes()
+            #if not paquetes:
+               # print("No hay paquetes disponibles para esas fechas.")
+                #return
+            #for paquete in paquetes:
+                #print(
+                  #  f"[{paquete[0]}] Destino: {paquete[1]} | {paquete[2]} al {paquete[3]} "
+                   # f"| Precio: {paquete[4]}"
+              #  )
         except Exception as error:
             print(f"Error al buscar paquetes: {error}")
 
@@ -276,12 +352,20 @@ class Menu:
             return
         try:
             self.__mostrar_paquetes_disponibles()
-            paquete_id = int(input("Indique el ID del paquete a reservar: ").strip())
+            paquete_id = input("Indique el ID del paquete a reservar: ").strip()
+            if paquete_id == "":
+                print("El ID no puede estar vacio")
+                return
+            elif paquete_id.isdigit() is False:
+                print("El ID debe ser un número válido.")
+                return
+            paquete_id = int(paquete_id)
             reserva_id = self.__reserva_controller.crear_reserva(self.__usuario_actual.id, paquete_id)
             if reserva_id:
                 print(f"Reserva creada con ID {reserva_id}.")
         except Exception as error:
             print(f"No se pudo crear la reserva: {error}")
+        input("Presione Enter para continuar...")
 
     # Muestra las reservas del usuario logueado.
     def __mostrar_reservas_cliente(self):
@@ -318,3 +402,123 @@ class Menu:
             return fecha.strftime("%Y-%m-%d")
         except ValueError:
             raise ValueError("La fecha debe seguir el formato DD-MM-AAAA.")
+        
+    # Muestra el menu de ajustes de cuenta para el usuario actual.
+    def __menu_ajustes_cuenta(self):
+        while True:
+            if self.__usuario_actual is None:
+                return
+            print("\n--- Ajustes de Cuenta ---")
+            print("1. Cambiar contraseña")
+            print("2. Actualizar información personal")
+            print("3. Eliminar cuenta")
+            print("4. Volver")
+            opcion = input("Seleccione una opción: ").strip()
+            if opcion == "1":
+                self.__cambiar_contrasena()
+            elif opcion == "2":
+                self.__actualizar_informacion_personal()
+            elif opcion == "3":
+                self.__eliminar_cuenta()
+            elif opcion == "4":
+                return
+            else:
+                print("Opción inválida.")
+
+    # Permite al usuario cambiar su contraseña.
+    def __cambiar_contrasena(self):
+        if not self.__usuario_actual:
+            print("Debe iniciar sesión primero.")
+            input("Presione Enter para continuar...")
+            return
+
+        print("\n=== Cambio de Contraseña ===")
+        vieja_contraseña = pwinput.pwinput("Contraseña actual: ", mask="*")
+        nueva_contraseña = pwinput.pwinput("Nueva contraseña: ", mask="*")
+        try:
+            self.__usuario_controller.cambiar_contrasena(
+                self.__usuario_actual.id, vieja_contraseña, nueva_contraseña
+            )
+            print("Contraseña cambiada exitosamente.")
+        except ValueError as ve:
+            print(f"Error: {ve}")
+        except Exception as error:
+            print(f"No se pudo cambiar la contraseña: {error}")
+        input("Presione Enter para continuar...")
+
+    def __actualizar_informacion_personal(self):
+        print("=== Tus datos personales ===")
+        print(f"1) Nombre: {self.__usuario_actual.nombre}")
+        print(f"2) Apellidos: {self.__usuario_actual.apellidos}")
+        print(f"3) Nickname: {self.__usuario_actual.nickname}")
+        print(f"4) Email: {self.__usuario_actual.email}")
+        print(f"5) Teléfono: {self.__usuario_actual.telefono}")
+        print("0) Salir")
+        opcion = input("Seleccione el campo a modificar: ").strip()
+
+        campos = { 
+            "1": "nombre",
+            "2": "apellidos",
+            "3": "nickname",
+            "4": "email",
+            "5": "telefono"
+        }
+
+        if opcion in campos:
+            nuevo_valor = input(f"Ingrese el nuevo valor para {campos[opcion]}: ").strip()
+            try:
+                self.__usuario_controller.modificar_usuario(
+                    self.__usuario_actual.id, campos[opcion], nuevo_valor
+                )
+                print(f"{campos[opcion].capitalize()} actualizado correctamente.")
+            except Exception as ValueError:
+                print(f"Error: {ValueError}")
+            except Exception as error:
+                print(f"Error al actualizar {campos[opcion]}: {error}")
+        input("Presione Enter para continuar...")
+
+    def __eliminar_cuenta(self):
+        print("=== Eliminar Cuenta ===")
+        confirmacion = input("¿Está seguro de que desea eliminar su cuenta? Esta acción no se puede deshacer (s/n): ").strip().lower()
+        if confirmacion == "s":
+            try:
+                self.__usuario_controller.eliminar_usuario(self.__usuario_actual.id)
+                print("Cuenta eliminada exitosamente.")
+                self.__usuario_actual = None
+            except Exception as error:
+                print(f"No se pudo eliminar la cuenta: {error}")
+        else:
+            print("Eliminación de cuenta cancelada.")
+        input("Presione Enter para continuar...")
+
+    def __eliminar_paquete(self):
+        try:
+            paquetes = self.__paquete_controller.listar()
+            if not paquetes:
+                print("No hay paquetes disponibles para eliminar.")
+                input("Presione Enter para continuar...")
+                return
+            print("=== Paquetes Turísticos ===")
+            for paquete in paquetes:
+                print(
+                    f"[{paquete[0]}] Destino: {paquete[1]} | {paquete[2]} al {paquete[3]} "
+                    f"| Precio: {paquete[4]} | Disponible: {'Sí' if paquete[5] else 'No'}"
+                )
+            paquete_id = input("ID del paquete a eliminar: ").strip()
+            if paquete_id == "" or not paquete_id.isdigit():
+                print("El ID debe ser un número válido.")
+                input("Presione Enter para continuar...")
+                return
+            consentimiento = input("¿Está seguro? Esta acción no se puede deshacer (s/n): ").strip().lower()
+            if consentimiento != "s":
+                print("Eliminación cancelada.")
+                input("Presione Enter para continuar...")
+                return
+            eliminado = self.__paquete_controller.eliminar(paquete_id)
+            if eliminado:
+                print("Paquete eliminado.")
+            else:
+                print("No se encontró el paquete indicado.")
+        except Exception as error:
+            print(f"Error al eliminar paquete: {error}")
+        input("Presione Enter para continuar...")

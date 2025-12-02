@@ -53,3 +53,26 @@ class UsuarioController:
             raise ValueError("El formato del número de teléfono es inválido.")
         if len(contrasena) < 8:
             raise ValueError("La contraseña debe tener al menos 8 caracteres.")
+
+    # Cierra la conexion activa.
+    def cerrar_conexion(self):
+        self.__conexion.cerrar_conexion()
+
+    def modificar_usuario(self, id, tipo, dato):
+        if not dato:
+            raise ValueError("Los valores no pueden estar vacíos.")
+        if tipo == "email" and not re.match(r"[^@]+@[^@]+\.[^@]+", dato):
+            raise ValueError("El formato del correo electrónico es inválido.")
+        if tipo == "telefono" and not re.match(r"^\+?\d{7,15}$", dato):
+            raise ValueError("El formato del número de teléfono es inválido.")
+        self.__usuario_service.modificar_usuario(id, tipo, dato)
+
+    def cambiar_contrasena(self, id, vieja_contraseña, nueva_contraseña):
+        # Validación: nueva contraseña mínima
+        if len(nueva_contraseña) < 8:
+            raise ValueError("La nueva contraseña debe tener al menos 8 caracteres.")
+        # Delegar al servicio (propaga ValueError si hay problema)
+        self.__usuario_service.cambiar_contrasena(id, vieja_contraseña, nueva_contraseña)
+
+    def eliminar_usuario(self, id):
+        self.__usuario_service.eliminar_cuenta(id)

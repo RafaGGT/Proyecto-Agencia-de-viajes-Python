@@ -23,18 +23,14 @@ class DestinoController:
         return self.__service.listar_destinos()
 
     # Actualiza un destino existente.
-    def actualizar(self, destino_id, nombre, descripcion, actividades, costo_base):
-        self.__validar(nombre, costo_base)
-        destino = Destino(
-            nombre=nombre,
-            descripcion=descripcion,
-            actividades=actividades,
-            costo_base=costo_base,
-        )
-        return self.__service.actualizar_destino(destino_id, destino)
+    def actualizar(self, destino_id, cambio, tipo):
+        return self.__service.actualizar_destino(destino_id, cambio, tipo)
 
     # Elimina un destino por su identificador.
     def eliminar(self, destino_id):
+        if not str(destino_id).isdigit():
+            raise ValueError("El ID de destino debe ser un número válido.")
+        destino_id = int(destino_id)
         return self.__service.eliminar_destino(destino_id)
 
     # Obtiene un destino especifico.

@@ -115,6 +115,22 @@ class PaqueteService:
         finally:
             cursor.close()
 
+    # Elimina un paquete por su id.
+    def eliminar_paquete(self, paquete_id):
+        cursor = self.__conexion.cursor()
+        try:
+            cursor.execute(
+                "DELETE FROM paquetes_turisticos WHERE id=%s;",
+                (paquete_id,),
+            )
+            self.__conexion.commit()
+            return cursor.rowcount > 0
+        except Exception as error:
+            self.__conexion.rollback()
+            raise error
+        finally:
+            cursor.close()
+
     # Calcula el precio total tomando la duracion del viaje.
     def __calcular_precio_total(self, paquete, costo_base_destino):
         try:

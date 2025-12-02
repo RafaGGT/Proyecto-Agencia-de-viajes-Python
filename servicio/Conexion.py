@@ -2,7 +2,7 @@ import mysql.connector
 
 class Conexion:
     # Crea una conexion manejada a la base de datos MySQL usando los parametros de acceso.
-    def __init__(self, user="viajes_admin", password="123", database="bdagencia", host="localhost", port=3306):
+    def __init__(self, user="root", password="root", database="bdagencia", host="localhost", port=3306):
         try:
             self.conexion = mysql.connector.connect(
                 user=user,
