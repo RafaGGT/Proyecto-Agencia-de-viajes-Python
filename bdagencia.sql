@@ -1,14 +1,14 @@
-CREATE DATABASE IF NOT EXISTS bdagencia;
+CREATE DATABASE bdagencia;
 USE bdagencia;
 
 -- ROLES
-CREATE TABLE IF NOT EXISTS roles (
+CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(20) NOT NULL
 );
 
 -- USUARIOS
-CREATE TABLE IF NOT EXISTS usuarios (
+CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL,
     apellidos VARCHAR(120) NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 -- DESTINOS
-CREATE TABLE IF NOT EXISTS destinos (
+CREATE TABLE destinos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     descripcion TEXT,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS destinos (
 );
 
 -- PAQUETES TURÍSTICOS
-CREATE TABLE IF NOT EXISTS paquetes_turisticos (
+CREATE TABLE paquetes_turisticos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     destino_id INT NOT NULL,
     fecha_inicio DATE NOT NULL,
@@ -48,13 +48,13 @@ CREATE TABLE IF NOT EXISTS paquetes_turisticos (
 );
 
 -- ESTADO
-CREATE TABLE IF NOT EXISTS estado (
+CREATE TABLE estado (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(120) NOT NULL
 );
 
 -- RESERVAS
-CREATE TABLE IF NOT EXISTS reservas (
+CREATE TABLE reservas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     paquete_id INT NOT NULL,
@@ -78,6 +78,6 @@ CREATE TABLE IF NOT EXISTS reservas (
 );
 
 -- USUARIO ADMINISTRADOR
-CREATE USER IF NOT EXISTS 'viajes_admin'@'%' IDENTIFIED BY '123*';
+CREATE USER 'viajes_admin'@'%' IDENTIFIED BY '123*';
 GRANT ALL PRIVILEGES ON bdagencia.* TO 'viajes_admin'@'%';
 FLUSH PRIVILEGES;
