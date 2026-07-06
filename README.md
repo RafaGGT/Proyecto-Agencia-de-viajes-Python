@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![License](https://img.shields.io/badge/Licencia-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Estado-En%20desarrollo-yellow?style=for-the-badge)
+![Status](https://img.shields.io/badge/Estado-Terminado-brightgreen?style=for-the-badge)
 ![CLI](https://img.shields.io/badge/Interfaz-CLI-lightgrey?style=for-the-badge)
 
 Sistema de gestión para una agencia de viajes desarrollado en **Python**, con arquitectura en capas (MVC) y persistencia en **MySQL**. Permite administrar destinos, paquetes turísticos, usuarios y reservas desde una interfaz de consola.
