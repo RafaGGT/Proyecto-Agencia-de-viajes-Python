@@ -146,12 +146,11 @@ Proyecto-Agencia-de-viajes-Python/
 ---
 
 ## 👨‍💻 Autores
-Lucas
-Rafa
-
-GitHub:
-https://github.com/LFP2002
-https://github.com/RafaGGT
+ 
+| Nombre | GitHub |
+|--------|--------|
+| Lucas  | [@LFP2002](https://github.com/LFP2002) |
+| Rafa   | [@RafaGGT](https://github.com/RafaGGT) |
 
 ---
 
